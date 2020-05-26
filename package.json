@@ -1,0 +1,12 @@
+{
+    "name": "bootcamp",
+    "version": "0.1.0",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "cross-env NODE_ENV=development nodemon src/server.js"
+    },
+    "dependencies": {
+        "dotenv": "^8.2.0",
+        "twilio": "^3.43.0"
+    }
+}
