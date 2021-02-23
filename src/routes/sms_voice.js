@@ -22,6 +22,21 @@ router.post('/sms-1', (req, res) => {
    res.end(twiml.toString());
  });
 
+//send sms
+router.post('/send_sms', (req, res) => {
+   from = req.body.from;
+   to = req.body.to;
+   body = req.body.body;
+   client.messages
+      .create({body, from, to})
+      .then(message => 
+         {
+            console.log(message.sid);
+            return res.json({messagesid:message.sid})
+         });
+   
+ });
+
 
  //to-do list--------
 let todoList = []
@@ -47,7 +62,6 @@ router.post('/sms', (req, res) => {
       returnMsg = `removed ${removed}`;
    }
    twiml.message(action, returnMsg);
- 
    res.writeHead(200, {'Content-Type': 'text/xml'});
    res.end(twiml.toString());
  });
@@ -122,7 +136,24 @@ router.post('/prep_call_msg', (req, res) => {
    console.log(`call coming from ${req.body.Caller}`)
    const VoiceResponse = require('twilio').twiml.VoiceResponse;
    const response = new VoiceResponse();
-   response.say("Your call will be recorded for training purposes");
+   //response.say("Your call will be recorded for training purposes");
+   response.record({ recordingStatusCallback:"http://354197e0a647.ngrok.io/api/sms_voice/callback"});
+ 
+   res.writeHead(200, {'Content-Type': 'text/xml'});
+   res.end(response.toString());
+ });
+
+ //say something before the call
+router.get('/play_digits', (req, res) => {
+   console.log(JSON.stringify(req.body));
+   console.log(`call coming from ${req.body.Caller}`)
+   const VoiceResponse = require('twilio').twiml.VoiceResponse;
+   const response = new VoiceResponse();
+
+   response.play({
+      digits: '123456789'
+   });
+   response.say("Thanks for listening");
  
    res.writeHead(200, {'Content-Type': 'text/xml'});
    res.end(response.toString());
@@ -150,16 +181,36 @@ router.post('/record_call', (req, res) => {
 
 router.post('/callback', (req, res) => {
    console.log(JSON.stringify(req.body));
+   const twiml = new MessagingResponse();
+   /**
    console.log(`CALLBACK----call coming from ${req.body.Caller}`)
    const VoiceResponse = require('twilio').twiml.VoiceResponse;
    const response = new VoiceResponse();
    if(req.body.Caller) {
       response.say("Thank you for your call.");
       response.hangup();
-   }
+   }**/
    res.writeHead(200, {'Content-Type': 'text/xml'});
-   res.end(response.toString());
+   res.end(twiml.toString());
  });
+
+ router.get('/calllog', (req, res) => {
+   /**
+   client.calls('CA86ab2c32c11f69760682ae81bbaa3a5a')
+         .fetch()
+         .then(call => {
+            console.log(JSON.stringify(call));
+            return res.json(call);
+
+         }); */
+
+   client.calls.list({to:"+6581259138",status:"completed",limit: 2})
+      .then(calls => 
+         {
+            return res.json(calls);
+         }
+         );
+ })
 
 
 module.exports = router;

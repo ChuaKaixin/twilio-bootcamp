@@ -12,6 +12,9 @@ app.use("/api/sms_voice", smsVoiceRouter);
 const whatsappRouter = require("./routes/whatsapp");
 app.use("/api/whatsapp", whatsappRouter);
 
+const miscRouter = require("./routes/misc");
+app.use("/api/misc", miscRouter);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   let err = new Error("Not Found");
